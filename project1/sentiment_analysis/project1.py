@@ -37,6 +37,7 @@ def hinge_loss_single(feature_vector, label, theta, theta_0):
     given data point and parameters.
     """
     # Your code here
+    return np.max([1 - label*(np.matmul(theta, feature_vector.transpose()) + theta_0), 0.0])
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -60,7 +61,13 @@ def hinge_loss_full(feature_matrix, labels, theta, theta_0):
     given dataset and parameters. This number should be the average hinge
     loss across all of the points in the feature matrix.
     """
+    hinge_loss_acc = 0
+    for (feature_vector, label) in zip(feature_matrix, labels):
+        hinge_loss_acc = hinge_loss_acc + hinge_loss_single(feature_vector, label, theta, theta_0)
+    return hinge_loss_acc/len(labels)
+
     # Your code here
+
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -88,6 +95,14 @@ def perceptron_single_step_update(
     real valued number with the value of theta_0 after the current updated has
     completed.
     """
+    if label * (np.dot(current_theta, feature_vector) + current_theta_0) > 0 :
+        theta = current_theta
+        theta_0 = current_theta_0
+    else:
+        theta = current_theta + label * feature_vector
+        theta_0 = current_theta_0 + label
+    return theta, theta_0
+
     # Your code here
     raise NotImplementedError
 #pragma: coderesponse end
@@ -120,10 +135,18 @@ def perceptron(feature_matrix, labels, T):
     the feature matrix.
     """
     # Your code here
+    theta = np.zeros(feature_matrix.shape[1])
+    theta_0 = 0
     for t in range(T):
         for i in get_order(feature_matrix.shape[0]):
             # Your code here
-            pass
+            theta, theta_0 = perceptron_single_step_update(
+                                    feature_matrix[i, :],
+                                    labels[i],
+                                    theta,
+                                    theta_0)
+
+    return theta, theta_0
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -159,6 +182,24 @@ def average_perceptron(feature_matrix, labels, T):
     find a sum and divide.
     """
     # Your code here
+    theta = np.zeros(feature_matrix.shape[1])
+    theta_0 = 0
+    theta_sum = theta
+    theta_0_sum = theta_0
+    for t in range(T):
+        for i in get_order(feature_matrix.shape[0]):
+            # Your code here
+            theta, theta_0 = perceptron_single_step_update(
+                                    feature_matrix[i, :],
+                                    labels[i],
+                                    theta,
+                                    theta_0)
+            theta_sum = theta_sum + theta
+            theta_0_sum = theta_0_sum + theta_0
+
+    nT = feature_matrix.shape[0] * T
+    return theta_sum/nT, theta_0/nT
+
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -191,6 +232,13 @@ def pegasos_single_step_update(
     completed.
     """
     # Your code here
+    if label * (np.dot(current_theta, feature_vector) + current_theta_0) > 1:
+        theta = (1 - eta*L) * current_theta
+        theta_0 = current_theta_0
+    else:
+        theta = (1 - eta*L) * current_theta + eta * label * feature_vector
+        theta_0 = current_theta_0 + eta * label
+    return theta, theta_0
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -226,6 +274,25 @@ def pegasos(feature_matrix, labels, T, L):
     parameter, found after T iterations through the feature matrix.
     """
     # Your code here
+    theta = np.zeros(feature_matrix.shape[1])
+    theta_0 = 0
+    count = 0
+    n_training = feature_matrix.shape[1]
+    for t in range(T):
+        for i in get_order(feature_matrix.shape[0]):
+            # Your code here
+            count = count+1  # its better to use a count, i is random
+            eta = 1 / np.sqrt(count)
+            theta, theta_0 = pegasos_single_step_update(
+                                feature_matrix[i, :],
+                                labels[i],
+                                L,
+                                eta,
+                                theta,
+                                theta_0)
+
+    return theta, theta_0
+
     raise NotImplementedError
 #pragma: coderesponse end
 
