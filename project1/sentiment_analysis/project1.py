@@ -186,6 +186,7 @@ def average_perceptron(feature_matrix, labels, T):
     theta_0 = 0
     theta_sum = theta
     theta_0_sum = theta_0
+
     for t in range(T):
         for i in get_order(feature_matrix.shape[0]):
             # Your code here
@@ -197,8 +198,10 @@ def average_perceptron(feature_matrix, labels, T):
             theta_sum = theta_sum + theta
             theta_0_sum = theta_0_sum + theta_0
 
+
+
     nT = feature_matrix.shape[0] * T
-    return theta_sum/nT, theta_0/nT
+    return theta_sum/nT, theta_0_sum/nT
 
     raise NotImplementedError
 #pragma: coderesponse end
