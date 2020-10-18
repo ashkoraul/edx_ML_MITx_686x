@@ -23,24 +23,24 @@ test_bow_features = p1.extract_bow_feature_vectors(test_texts, dictionary)
 #-------------------------------------------------------------------------------
 # Problem 5
 #-------------------------------------------------------------------------------
-
-toy_features, toy_labels = toy_data = utils.load_toy_data('toy_data.tsv')
-
-T = 10
-L = 0.2
-
-thetas_perceptron = p1.perceptron(toy_features, toy_labels, T)
-thetas_avg_perceptron = p1.average_perceptron(toy_features, toy_labels, T)
-thetas_pegasos = p1.pegasos(toy_features, toy_labels, T, L)
-
-def plot_toy_results(algo_name, thetas):
-    print('theta for', algo_name, 'is', ', '.join(map(str,list(thetas[0]))))
-    print('theta_0 for', algo_name, 'is', str(thetas[1]))
-    utils.plot_toy_data(algo_name, toy_features, toy_labels, thetas)
-
-plot_toy_results('Perceptron', thetas_perceptron)
-plot_toy_results('Average Perceptron', thetas_avg_perceptron)
-plot_toy_results('Pegasos', thetas_pegasos)
+#
+# toy_features, toy_labels = toy_data = utils.load_toy_data('toy_data.tsv')
+#
+# T = 10
+# L = 0.2
+#
+# thetas_perceptron = p1.perceptron(toy_features, toy_labels, T)
+# thetas_avg_perceptron = p1.average_perceptron(toy_features, toy_labels, T)
+# thetas_pegasos = p1.pegasos(toy_features, toy_labels, T, L)
+#
+# def plot_toy_results(algo_name, thetas):
+#     print('theta for', algo_name, 'is', ', '.join(map(str,list(thetas[0]))))
+#     print('theta_0 for', algo_name, 'is', str(thetas[1]))
+#     utils.plot_toy_data(algo_name, toy_features, toy_labels, thetas)
+#
+# plot_toy_results('Perceptron', thetas_perceptron)
+# plot_toy_results('Average Perceptron', thetas_avg_perceptron)
+# plot_toy_results('Pegasos', thetas_pegasos)
 
 #-------------------------------------------------------------------------------
 # Problem 7
@@ -105,15 +105,26 @@ plot_toy_results('Pegasos', thetas_pegasos)
 # test_bow_features and test_labels.
 #-------------------------------------------------------------------------------
 
-# Your code here
+# Your code here AR
+T = 25
+L = 0.01
+
+avg_peg_train_accuracy, avg_peg_val_accuracy = \
+   p1.classifier_accuracy(p1.pegasos, train_bow_features,test_bow_features,train_labels,test_labels,T=T,L=L)
+print("{:50} {:.4f}".format("Test accuracy for Pegasos:", avg_peg_val_accuracy))
+
 
 #-------------------------------------------------------------------------------
 # Assign to best_theta, the weights (and not the bias!) learned by your most
 # accurate algorithm with the optimal choice of hyperparameters.
 #-------------------------------------------------------------------------------
 
-# best_theta = None # Your code here
-# wordlist   = [word for (idx, word) in sorted(zip(dictionary.values(), dictionary.keys()))]
-# sorted_word_features = utils.most_explanatory_word(best_theta, wordlist)
-# print("Most Explanatory Word Features")
-# print(sorted_word_features[:10])
+
+T = 25
+L = 0.01
+
+best_theta, theta_0 = p1.pegasos(train_bow_features, train_labels, T, L) # Your code here
+wordlist   = [word for (idx, word) in sorted(zip(dictionary.values(), dictionary.keys()))]
+sorted_word_features = utils.most_explanatory_word(best_theta, wordlist)
+print("Most Explanatory Word Features")
+print(sorted_word_features[:10])

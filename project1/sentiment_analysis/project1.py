@@ -321,6 +321,11 @@ def classify(feature_matrix, theta, theta_0):
     be considered a positive classification.
     """
     # Your code here
+    classifier_output = np.ones(feature_matrix.shape[0])
+    # compute theta.x + theta_0 for all rows and compare with zero to get the index
+    index_logic = np.matmul(feature_matrix, theta) + theta_0 > 0
+    classifier_output[~index_logic] = -1
+    return classifier_output
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -359,6 +364,12 @@ def classifier_accuracy(
     accuracy of the trained classifier on the validation data.
     """
     # Your code here
+
+    theta, theta_0 = classifier(train_feature_matrix, train_labels, **kwargs)
+    train_pred = classify(train_feature_matrix, theta, theta_0)
+    val_pred = classify(val_feature_matrix, theta, theta_0)
+    return accuracy(train_pred, train_labels), accuracy(val_pred, val_labels)
+
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -387,12 +398,14 @@ def bag_of_words(texts):
     Feel free to change this code as guided by Problem 9
     """
     # Your code here
+    stopwords = np.genfromtxt("stopwords.txt", dtype='str')
     dictionary = {} # maps word to unique index
     for text in texts:
         word_list = extract_words(text)
         for word in word_list:
             if word not in dictionary:
-                dictionary[word] = len(dictionary)
+                if word not in stopwords:
+                    dictionary[word] = len(dictionary)
     return dictionary
 #pragma: coderesponse end
 
@@ -417,7 +430,9 @@ def extract_bow_feature_vectors(reviews, dictionary):
         word_list = extract_words(text)
         for word in word_list:
             if word in dictionary:
-                feature_matrix[i, dictionary[word]] = 1
+                # feature_matrix[i, dictionary[word]] = 1
+                feature_matrix[i, dictionary[word]] = word_list.count(word) # AR
+
     return feature_matrix
 #pragma: coderesponse end
 
