@@ -31,6 +31,18 @@ def compute_probabilities(X, theta, temp_parameter):
     Returns:
         H - (k, n) NumPy array, where each entry H[j][i] is the probability that X[i] is labeled as j
     """
+    n, d = X.shape
+    k = theta.shape[0]
+    H = np.zeros([k,n], dtype=np.float64)
+    for i in range(n):
+        #theta_x_by_tau = np.square(np.linalg.norm(X[i] * theta, axis = 1))/temp_parameter # compute the theta_j .x / temperature param
+        theta_x_by_tau = np.matmul(theta, X[i]) / temp_parameter
+        theta_x_by_tau_withc = theta_x_by_tau-theta_x_by_tau.max()
+        exp_theta_x_by_tau_withc = np.exp(theta_x_by_tau_withc)
+        H[:, i] = 1/exp_theta_x_by_tau_withc.sum() * exp_theta_x_by_tau_withc
+    return H
+
+
     #YOUR CODE HERE
     raise NotImplementedError
 
@@ -50,7 +62,79 @@ def compute_cost_function(X, Y, theta, lambda_factor, temp_parameter):
     Returns
         c - the cost value (scalar)
     """
+    n, d = X.shape
+    k = theta.shape[0]
+    H_new = np.zeros([k, n], dtype=np.float64)
+    j = range(k)
+    # for i in range(n):
+    #     theta_x_by_tau = np.matmul(theta, X[i]) / temp_parameter
+    #     exp_theta_x_by_tau = np.exp(theta_x_by_tau)
+    #
+    #     #if ((Y[i]==i) ):
+    #     H[:, i] = (Y[i] ==j) * np.log(exp_theta_x_by_tau/exp_theta_x_by_tau.sum())
+    H = compute_probabilities(X, theta, temp_parameter)
+
+    # logH= np.log(H)
+    # for i in range(n):
+    #     H[:, i] = (Y[i] == j) * logH[:, i]
+    # theta_sq = theta * theta
+    # c = -1/n * H.sum() + lambda_factor/2 * theta_sq.sum()
+
+    for i in range(n):
+        H_new[Y[i],i] = np.log(H[Y[i], i ])
+    theta_sq = theta * theta
+    c_new = -1 / n * H_new.sum() + lambda_factor / 2 * theta_sq.sum()
+
+
+    return c_new
     #YOUR CODE HERE
+    raise NotImplementedError
+
+def run_gradient_descent_iteration_AR(X, Y, theta, alpha, lambda_factor, temp_parameter):
+    """
+    Runs one step of batch gradient descent
+
+    Args:
+        X - (n, d) NumPy array (n datapoints each with d features)
+        Y - (n, ) NumPy array containing the labels (a number from 0-9) for each
+            data point
+        theta - (k, d) NumPy array, where row j represents the parameters of our
+                model for label j
+        alpha - the learning rate (scalar)
+        lambda_factor - the regularization constant (scalar)
+        temp_parameter - the temperature parameter of softmax function (scalar)
+
+    Returns:
+        theta - (k, d) NumPy array that is the final value of parameters theta
+    """
+    #YOUR CODE HERE
+    n, d = X.shape
+    k = theta.shape[0]
+    # H_new = np.zeros([k, n], dtype=np.float64)
+    H = compute_probabilities(X, theta, temp_parameter)
+    j = range(k)
+    # theta_sum = np.zeros([k,d], dtype=np.float64)
+    # # H_new = H
+    # # H[H<0] = 0.0
+    # # H[H>1] = 1.0
+    # for i in range(n):
+    #     term1 = X[i].reshape(1, d)
+    #     term2 = ((Y[i] == j) - H[:, i])
+    #     term2 = term2.reshape(k, 1)
+    #
+    #     theta_sum = theta_sum + term1*term2
+    theta_sum = np.zeros([k, d], dtype=np.float64)
+    M = sparse.coo_matrix(([1] * n, (Y, range(n))), shape=(k, n), dtype=np.float64).toarray()
+    diff = M-H
+
+    for i in range(n):
+        term1 = X[i].reshape(1, d)
+        term2 = diff[:, i]
+        term2 = term2.reshape(k, 1)
+        theta_sum = theta_sum + term1 * term2
+
+    return theta - alpha*(-1/(temp_parameter*n)*theta_sum + lambda_factor*theta)
+
     raise NotImplementedError
 
 def run_gradient_descent_iteration(X, Y, theta, alpha, lambda_factor, temp_parameter):
@@ -71,7 +155,14 @@ def run_gradient_descent_iteration(X, Y, theta, alpha, lambda_factor, temp_param
         theta - (k, d) NumPy array that is the final value of parameters theta
     """
     #YOUR CODE HERE
-    raise NotImplementedError
+    n, d = X.shape
+    k = theta.shape[0]
+    H = compute_probabilities(X, theta, temp_parameter)
+    theta_sum = np.zeros([k,d], dtype=np.float64)
+    M = sparse.coo_matrix(([1] * n, (Y, range(n))), shape=(k, n), dtype=np.int8).toarray()
+    diff = M-H
+    theta_sum = np.matmul(diff, X)
+    return theta - alpha*(-1/(temp_parameter*n)*theta_sum + lambda_factor*theta)
 
 def update_y(train_y, test_y):
     """
