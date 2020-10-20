@@ -19,6 +19,8 @@ def polynomial_kernel(X, Y, c, p):
         Returns:
             kernel_matrix - (n, m) Numpy array containing the kernel matrix
     """
+    prod = np.matmul(X,Y.transpose())
+    return (prod + c ) ** p
     # YOUR CODE HERE
     raise NotImplementedError
 
@@ -39,4 +41,13 @@ def rbf_kernel(X, Y, gamma):
             kernel_matrix - (n, m) Numpy array containing the kernel matrix
     """
     # YOUR CODE HERE
+    n,d = X.shape
+    m,d2 = Y.shape
+
+    X_new = np.broadcast_to (X[...,None],[n,d,m])
+    Y_new = np.broadcast_to (Y[...,None],[m,d,n])
+    Y_new_T = Y_new.transpose(2,1,0)
+    diff = X_new - Y_new_T
+    diff_norm = np.linalg.norm(diff, axis = 1)
+    return np.exp(-gamma * (diff_norm**2))
     raise NotImplementedError

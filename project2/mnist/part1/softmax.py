@@ -181,6 +181,7 @@ def update_y(train_y, test_y):
         test_y_mod3 - (n, ) NumPy array containing the new labels (a number between 0-2)
                     for each datapoint in the test set
     """
+    return train_y % 3, test_y % 3
     #YOUR CODE HERE
     raise NotImplementedError
 
@@ -196,9 +197,13 @@ def compute_test_error_mod3(X, Y, theta, temp_parameter):
                 model for label j
         temp_parameter - the temperature parameter of softmax function (scalar)
 
+
     Returns:
         test_error - the error rate of the classifier (scalar)
     """
+    y_estimate = get_classification(X, theta, temp_parameter) % 3
+    error = (y_estimate != Y)
+    return error.sum()/Y.shape[0]
     #YOUR CODE HERE
     raise NotImplementedError
 
